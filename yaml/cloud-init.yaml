@@ -1,0 +1,22 @@
+#cloud-config
+
+users:
+  - name: ${ user }
+    groups: sudo
+    shell: /bin/bash
+    sudo: ['ALL=(ALL) NOPASSWD:ALL']
+    ssh-authorized-keys:
+      - |-
+        ${ indent(8, sshPublicKey) }
+
+bootcmd:
+  - mkdir -p /home/${user}/valheim_worlds_local
+  - sudo chmod -R 777 /home/${user}/valheim_worlds_local
+
+ssh_pwauth: no
+ssh_deletekeys: false
+#ssh_keys:
+#  rsa_private: |-
+#    { indent(4, sshHostPrivateKey) }
+#  rsa_public: |-
+#    { indent(4, sshHostPublicKey) }
