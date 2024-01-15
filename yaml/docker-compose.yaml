@@ -2,7 +2,7 @@ version: '2.3'
 
 services:
   backup-agent:
-    image: aerondigth/backup-agent:0.0.8
+    image: aerondigth/backup-agent:0.0.10
     privileged: true
 
     volumes:
@@ -14,6 +14,8 @@ services:
     environment:
     - BACKUP_CRON=${backup.cron}
     - BACKUP_DIR=/valheim_worlds_local
+    - BACKUP_FILE_REGEX=${env.world_name}\.(db|fwl)$
+    - BACKUP_RESTORE_ON_STARTUP=${backup.restore_on_startup}
     - BUCKET_ID=${ backup.bucket_id }
     - OBJECT_ID=${ env.world_name }
     - HTTP_PORT=${ backup.http_port }
@@ -42,7 +44,7 @@ services:
     - SERVER_PASS=${ env.server_pass }
     - SERVER_PUBLIC=${ env.server_public }
     - WORLD_NAME=${ env.world_name }
-    - ADMINLIST_IDS='${ join(" ", env.adminlist_ids) }'
+    - ADMINLIST_IDS=${ join(" ", env.adminlist_ids) }
     - TZ=${ env.tz }
     - BACKUPS=false
     - BACKUPS_MAX_AGE=3

@@ -4,12 +4,16 @@ import (
 	"backup-agent/internal/adapters/aws"
 	"backup-agent/internal/adapters/filesystem"
 	"backup-agent/internal/app"
-	httpport "backup-agent/internal/ports/http"
+	"backup-agent/internal/ports/httpserver"
+	"github.com/robfig/cron/v3"
+	"regexp"
 )
 
 var (
-	config = MustLoadConfigFromEnv()
-	logger = app.Zerolog()
+	config          = MustLoadConfigFromEnv()
+	logger          = app.Zerolog()
+	dirContentRegex = regexp.MustCompile(config.BackupFileRegex)
+	cronLauncher    = cron.New(cron.WithLogger(app.CronLogger(logger)))
 
 	s3Storage = func() aws.S3BackupStorage {
 		s3, err := aws.NewS3BackupStorage(config.BucketID, config.ObjectID)
@@ -19,23 +23,21 @@ var (
 		return *s3
 	}()
 
-	cron = app.BackupCron(app.CronLogger(logger))
-
 	backupJob = app.BackupJob{
 		Path:          config.BackupDir,
-		Zipper:        filesystem.ZipDirectory,
+		Zipper:        filesystem.DirectoryRegexZipper(dirContentRegex),
 		BackupStorage: s3Storage,
 		Logger:        logger,
 	}
 
 	restoreJob = app.RestoreJob{
 		Path:          config.BackupDir,
-		Unzipper:      filesystem.UnzipToDirectory,
+		Unzipper:      filesystem.DirectoryUnzipper,
 		BackupStorage: s3Storage,
 		Logger:        logger,
 	}
 
-	server = httpport.Server{
+	server = httpserver.Server{
 		BackupJob:  backupJob,
 		RestoreJob: restoreJob,
 		Logger:     logger,
@@ -44,16 +46,18 @@ var (
 
 func main() {
 	logger.Debug().Msgf("Starting with config: %+v", config)
-	if _, err := cron.AddJob(config.BackupCron, backupJob); err != nil {
+	if _, err := cronLauncher.AddJob(config.BackupCron, backupJob); err != nil {
 		logger.Fatal().Err(err).Msg("failed to add cron job")
 	}
 
-	logger.Info().Msg("restoring latest backup")
-	if err := restoreJob.Restore(); err != nil {
-		logger.Warn().Err(err).Msg("failed to restore latest backup")
+	if config.BackupRestoreOnStartup {
+		logger.Info().Msg("restoring latest backup")
+		if err := restoreJob.Restore(); err != nil {
+			logger.Warn().Err(err).Msg("failed to restore latest backup")
+		}
 	}
 
-	cron.Start()
+	cronLauncher.Start()
 
 	server.Start(config.HttpPort)
 }

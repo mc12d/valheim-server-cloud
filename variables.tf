@@ -45,6 +45,7 @@ variable "valheim_backup_env" {
         http_port = number
         bucket_id = string
         cron = string
+        restore_on_startup = bool
     })
 }
 

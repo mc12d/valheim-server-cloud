@@ -32,9 +32,9 @@ valheim_server_env = {
     tz = "RU"
 }
 
-# Available backup-agent http endpoints:
-#  - /backup/make --> uploads current worlds_local to s3 (zip-compressed)
-#  - /backup/restore(?version=ABCDE) --> replaces worlds_local contents with downloaded backup,
+# Available backup-agent httpserver endpoints:
+#  - POST /backup/make --> uploads current worlds_local to s3 (zip-compressed)
+#  - POST /backup/restore(?version=ABCDE) --> replaces worlds_local contents with downloaded backup,
 #     newest version if not specified
 #
 # Note: valheim-server itself updates worlds_local content every 20 mins (or via manual save or sleep)
@@ -43,5 +43,7 @@ valheim_backup_env = {
     http_port = 9080
     bucket_id = "valheim-backup"
     cron = "*/10 * * * *"
+    # replace worlds_local content with latest backup on startup
+    restore_on_startup = true
 }
 

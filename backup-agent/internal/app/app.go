@@ -2,7 +2,6 @@ package app
 
 import (
 	"fmt"
-
 	"github.com/rs/zerolog"
 )
 

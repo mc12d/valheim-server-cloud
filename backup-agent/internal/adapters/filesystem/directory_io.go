@@ -1,23 +1,27 @@
 package filesystem
 
 import (
+	"backup-agent/internal/app"
 	"bytes"
+	"regexp"
 )
 
-type DirWriteMode int
+var (
+	DirectoryZipper app.BackupZipper = func(path string) ([]byte, error) {
+		return zipDir(path)
+	}
 
-const (
-	Mb int64 = 2 << 20
-)
-
-func ZipDirectory(path string) (zip []byte, err error) {
-	return zipDir(path)
-}
-
-func UnzipToDirectory(path string, zip []byte) error {
-	if err := removeDirContent(path); err != nil {
+	DirectoryUnzipper app.BackupUnzipper = func(path string, zip []byte) error {
+		if err := removeDirContent(path); err != nil {
+			return err
+		}
+		_, err := unzipToDir(bytes.NewReader(zip), int64(len(zip)), path)
 		return err
 	}
-	_, err := unzipToDir(bytes.NewReader(zip), int64(len(zip)), path)
-	return err
+)
+
+func DirectoryRegexZipper(dirContentRegex *regexp.Regexp) app.BackupZipper {
+	return func(path string) ([]byte, error) {
+		return zipDirRegex(path, dirContentRegex)
+	}
 }

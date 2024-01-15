@@ -7,8 +7,11 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 )
+
+var regexEverything = regexp.MustCompile(".*")
 
 // unzipToDir https://stackoverflow.com/a/24792688/11119471
 func unzipToDir(zipContent io.ReaderAt, assumedSize int64, destPath string) (bytesWritten int, err error) {
@@ -73,8 +76,12 @@ func unzipToDir(zipContent io.ReaderAt, assumedSize int64, destPath string) (byt
 	return bytesWritten, nil
 }
 
-// zipDir https://stackoverflow.com/a/49057861/11119471
 func zipDir(path string) ([]byte, error) {
+	return zipDirRegex(path, regexEverything)
+}
+
+// zipDir https://stackoverflow.com/a/49057861/11119471
+func zipDirRegex(path string, includeRegex *regexp.Regexp) ([]byte, error) {
 	destination := &bytes.Buffer{}
 	myZip := zip.NewWriter(destination)
 
@@ -87,6 +94,9 @@ func zipDir(path string) ([]byte, error) {
 		}
 		if err != nil {
 			return err
+		}
+		if !includeRegex.MatchString(filePath) {
+			return nil
 		}
 		relPath := strings.TrimPrefix(filePath, path)
 		zipFile, err := myZip.Create(relPath)
