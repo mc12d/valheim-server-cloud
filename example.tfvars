@@ -12,7 +12,7 @@ vm_access = {
 
 s3 = {
     bucket = "valheim-backup"
-    noncurrent_version_expiration_days = 7
+    noncurrent_version_expiration_days = 3
 }
 
 # these vars define env for docker images
@@ -37,13 +37,12 @@ valheim_server_env = {
 #  - POST /backup/restore(?version=ABCDE) --> replaces worlds_local contents with downloaded backup,
 #     newest version if not specified
 #
-# Note: valheim-server itself updates worlds_local content every 20 mins (or via manual save or sleep)
-#   10 mins chosen to half maximum backup delay
+# In this configuration, you can lose at worst case 7 minutes of game progress (if vm hangs right before planed world save)
 valheim_backup_env = {
     http_port = 9080
     bucket_id = "valheim-backup"
-    cron = "*/10 * * * *"
-    # replace worlds_local content with latest backup on startup
-    restore_on_startup = true
+    interval_minutes = 7
+    # replace worlds_local content with latest uploaded backup on startup
+    restore_on_startup = false
 }
 

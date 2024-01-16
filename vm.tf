@@ -47,9 +47,9 @@ resource "yandex_compute_instance" "valheim-vm" {
   allow_stopping_for_update = true
 
   resources {
-    cores  = 4
+    cores  = 2
     core_fraction = 100
-    memory = 8
+    memory = 6
   }
 
   metadata = {

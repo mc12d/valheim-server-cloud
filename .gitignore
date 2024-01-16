@@ -16,4 +16,5 @@ host_rsa
 host_rsa.pub
 
 backup-agent/internal/adapters/filesystem/testdata/testdir_result
+backup-agent/bin
 

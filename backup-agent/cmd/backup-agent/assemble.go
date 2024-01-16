@@ -5,6 +5,7 @@ import (
 	"backup-agent/internal/adapters/filesystem"
 	"backup-agent/internal/app"
 	"backup-agent/internal/ports/httpserver"
+	"fmt"
 	"github.com/robfig/cron/v3"
 	"regexp"
 )
@@ -46,7 +47,7 @@ var (
 
 func main() {
 	logger.Debug().Msgf("Starting with config: %+v", config)
-	if _, err := cronLauncher.AddJob(config.BackupCron, backupJob); err != nil {
+	if _, err := cronLauncher.AddJob(cronSpecFromMinutes(config.BackupIntervalMinutes), backupJob); err != nil {
 		logger.Fatal().Err(err).Msg("failed to add cron job")
 	}
 
@@ -60,4 +61,8 @@ func main() {
 	cronLauncher.Start()
 
 	server.Start(config.HttpPort)
+}
+
+func cronSpecFromMinutes(minutes int) string {
+	return fmt.Sprintf("*/%d * * * *", minutes)
 }

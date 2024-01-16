@@ -44,7 +44,7 @@ variable "valheim_backup_env" {
     type = object({
         http_port = number
         bucket_id = string
-        cron = string
+        interval_minutes = number
         restore_on_startup = bool
     })
 }

@@ -12,8 +12,8 @@ type Config struct {
 
 	BackupDir              string `envconfig:"BACKUP_DIR" default:"backup_dir"`
 	BackupFileRegex        string `envconfig:"BACKUP_FILE_REGEX" default:".*"`
-	BackupCron             string `envconfig:"BACKUP_CRON" default:"*/5 * * * *"`
-	BackupRestoreOnStartup bool   `envconfig:"BACKUP_RESTORE_ON_STARTUP" default:"true""`
+	BackupIntervalMinutes  int    `envconfig:"BACKUP_INTERVAL_MINUTES" default:"10"`
+	BackupRestoreOnStartup bool   `envconfig:"BACKUP_RESTORE_ON_STARTUP" default:"true"`
 
 	HttpPort int `envconfig:"HTTP_PORT" default:"8080"`
 }

@@ -2,7 +2,7 @@ version: '2.3'
 
 services:
   backup-agent:
-    image: aerondigth/backup-agent:0.0.10
+    image: aerondigth/backup-agent:0.0.11
     privileged: true
 
     volumes:
@@ -12,7 +12,7 @@ services:
     - "${backup.http_port}:${backup.http_port}/tcp"
 
     environment:
-    - BACKUP_CRON=${backup.cron}
+    - BACKUP_INTERVAL_MINUTES=${backup.interval_minutes}
     - BACKUP_DIR=/valheim_worlds_local
     - BACKUP_FILE_REGEX=${env.world_name}\.(db|fwl)$
     - BACKUP_RESTORE_ON_STARTUP=${backup.restore_on_startup}
@@ -40,15 +40,15 @@ services:
     - SUPERVISOR_HTTP_PORT=${supervisor.supervisor_http_port}
     - SUPERVISOR_HTTP_USER=${supervisor.supervisor_http_user}
     - SUPERVISOR_HTTP_PASS=${supervisor.supervisor_http_pass}
-    - SERVER_NAME=${ env.server_name }
-    - SERVER_PASS=${ env.server_pass }
-    - SERVER_PUBLIC=${ env.server_public }
-    - WORLD_NAME=${ env.world_name }
+    - SERVER_NAME=${env.server_name}
+    - SERVER_PASS=${env.server_pass}
+    - SERVER_PUBLIC=${env.server_public}
+    - WORLD_NAME=${env.world_name}
     - ADMINLIST_IDS=${ join(" ", env.adminlist_ids) }
-    - TZ=${ env.tz }
+    - TZ=${env.tz}
     - BACKUPS=false
     - BACKUPS_MAX_AGE=3
     - BACKUPS_MAX_COUNT=100
     - STATUS_HTTP=true
     - STATUS_HTTP_PORT=8082
-
+    - SERVER_ARGS=-saveinterval ${backup.interval_minutes * 60} -backups 1
